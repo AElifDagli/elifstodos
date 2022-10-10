@@ -120,7 +120,10 @@ async def get_current_user(request: Request):
             logout(request)
         return {"username": username, "id": user_id}
     except JWTError:
-        raise HTTPException(status_code=404, detail="Not Found")
+        return None
+        #return templates.TemplateResponse("login.html", {"request": request, "msg": "Not Found"})
+        #return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
+        #raise HTTPException(status_code=404, detail="Not Found")
 
 # login and return the token.
 @router.post("/token")
@@ -129,7 +132,7 @@ async def login_for_access_token(response: Response, form_data: OAuth2PasswordRe
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         return False
-    token_expires = timedelta(minutes=60)
+    token_expires = timedelta(minutes=3600)
     token = create_access_token(user.username,
                                 user.id,
                                 expires_delta=token_expires)
